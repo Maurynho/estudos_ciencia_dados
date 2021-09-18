@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   elementFormDefault="qualified">
+
+	<xs:element name="Doc5300" type="Doc5300ComplexType" >
+	<!--
+	<xs:unique name="ucIdentificacaoCooperado">
+		<xs:selector xpath=".//cooperado" />
+		<xs:field xpath="@identificacao" />
+	</xs:unique>
+	-->
+	</xs:element>
+	<xs:complexType name="Doc5300ComplexType">
+		<xs:sequence>
+			<xs:element name="cooperados" type="CooperadosComplexType" />
+		</xs:sequence>
+		<xs:attribute name="data-base" type="xs:gYearMonth" use="required"/>
+		<xs:attribute name="tipo-remessa" type="TipoRemessaSimpleType" use="required"/>
+		<xs:attribute name="cnpj" type="CnpjSimpleType" use="required"/>
+		<xs:attribute name="codigo-documento" type="codigoDocumentoSimpleType" use="required"/>
+	</xs:complexType>
+	<xs:simpleType name="codigoDocumentoSimpleType">
+		<xs:restriction base="xs:integer">
+            <xs:pattern value="5300" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="CooperadosComplexType">
+		<xs:sequence>
+			<xs:element name="cooperado" type="CooperadoComplexType" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="CooperadoComplexType">
+		<!-- Pode ocorrer relacionamento-atual e relacionamento-encerrados ou ao menos um dos dois. -->
+		<xs:choice>
+			<xs:sequence>
+				<xs:element name="relacionamento-atual" type="RelacionamentoAtualComplexType" minOccurs="1" />
+				<xs:element name="relacionamentos-encerrados" type="RelacionamentosEncerradoComplexType" minOccurs="0" />
+			</xs:sequence>
+			<xs:sequence>
+				<xs:element name="relacionamentos-encerrados" type="RelacionamentosEncerradoComplexType" minOccurs="1" />
+			</xs:sequence>
+		</xs:choice>
+		<xs:attribute name="pessoa" type="PessoaSimpleType" use="required" />
+		<xs:attribute name="identificacao" type="CnpjOuCpfSimpleType" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="RelacionamentoAtualComplexType">
+		<xs:choice>
+			<xs:sequence>
+				<xs:element name="municipio" type="xs:integer" />
+				<xs:element name="operacoes-como-titular" type="OperacoesComoTitularComplexType" />
+				<xs:element name="capital-integralizado" type="PositivoComCentavosSimpleType" />
+				<xs:element name="capital-a-integralizar" type="PositivoComCentavosSimpleType" />
+			</xs:sequence>
+			<xs:sequence>
+			</xs:sequence>
+		</xs:choice>
+		<xs:attribute name="inicio" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:date">
+              <xs:minInclusive value="1900-01-01"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="RelacionamentoEncerradoComplexType">
+		<xs:attribute name="inicio" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:date">
+              <xs:minInclusive value="1900-01-01"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+		<xs:attribute name="fim" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:date">
+              <xs:minInclusive value="1900-01-01"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="RelacionamentosEncerradoComplexType">
+		<xs:sequence>
+			<xs:element name="relacionamento" type="RelacionamentoEncerradoComplexType" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="OperacoesComoTitularComplexType">
+		<xs:sequence>
+			<xs:element name="conta-corrente" type="SimOuNaoSimpleType" />
+			<xs:element name="deposito-a-prazo" type="SimOuNaoSimpleType" />
+			<xs:element name="deposito-sob-aviso" type="SimOuNaoSimpleType" />
+			<xs:element name="op-credito" type="SimOuNaoSimpleType" />
+			<xs:element name="outros" type="SimOuNaoSimpleType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="TipoRemessaSimpleType">
+		<xs:restriction base="xs:string">
+			<!--
+			I - Inclusão
+			S - Substituição
+			-->
+			<xs:pattern value="I|S" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CnpjSimpleType">
+		<xs:restriction base="xs:integer">
+			<xs:pattern value="[0-9]{8}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PessoaSimpleType">
+		<xs:restriction base="xs:integer">
+			<!--
+			1 – Pessoa Física residente no país
+            2 – Pessoa Jurídica domiciliada no país
+            3 – Pessoa Física residente no exterior
+            4 – Pessoa Jurídica domiciliada no exterior
+			-->
+			<xs:pattern value="[1-4]" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CnpjOuCpfSimpleType">
+		<xs:restriction base="xs:integer">
+			<xs:pattern value="[0-9]{11,14}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PositivoComCentavosSimpleType">
+		<xs:restriction base="xs:decimal">
+			<xs:fractionDigits value="2" />
+			<xs:minInclusive value="0" />
+			<xs:pattern value="\d+\.\d{2}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SimOuNaoSimpleType">
+		<xs:restriction base="xs:string">
+			<!-- Sim | Não -->
+			<xs:pattern value="S|N" />
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
